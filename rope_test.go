@@ -54,7 +54,7 @@ func TestDelete(t *testing.T) {
 func TestBalance(t *testing.T) {
 	rope := NewString("hello")
 	for i := 0; i < 32; i++ {
-		rope = &Rope{
+		rope = concat{
 			length: 5,
 			depth:  i + 1,
 			left:   rope,
@@ -66,7 +66,7 @@ func TestBalance(t *testing.T) {
 		t.Fatalf("expected rope to be unbalanced")
 	}
 
-	rope = rebalance(rope)
+	rope = rope.rebalance()
 
 	if !rope.isBalanced() {
 		t.Fatalf("expected rope to be balanced")
