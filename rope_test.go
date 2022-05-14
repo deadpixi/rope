@@ -16,11 +16,11 @@ func expectInt(a, b int, t *testing.T) {
 	}
 }
 
-func TestConcat(t *testing.T) {
+func TestAppend(t *testing.T) {
 	rope := NewString("foo")
 	expectString("foo", rope.String(), t)
 
-	rope = rope.ConcatString("bar")
+	rope = rope.AppendString("bar")
 	expectString("foobar", rope.String(), t)
 
 	expectInt(6, rope.Length(), t)
@@ -79,7 +79,7 @@ func TestBalance(t *testing.T) {
 func TestBigString(t *testing.T) {
 	rope := New()
 	for i := 0; i < 1048576/32; i++ {
-		rope = rope.ConcatString("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+		rope = rope.AppendString("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
 	}
 
 	if !rope.isBalanced() {

@@ -91,31 +91,31 @@ func merge(leaves []*Rope, start, end int) *Rope {
 	case 1:
 		return leaves[start]
 	case 2:
-		return leaves[start].Concat(leaves[start+1])
+		return leaves[start].Append(leaves[start+1])
 	default:
 		mid := start + length/2
-		return merge(leaves, start, mid).Concat(merge(leaves, mid, end))
+		return merge(leaves, start, mid).Append(merge(leaves, mid, end))
 	}
 }
 
 func (node *Rope) Insert(other *Rope, at int) *Rope {
 	if at == 0 {
-		return other.Concat(node)
+		return other.Append(node)
 	}
 
 	if at == node.Length() {
-		return node.Concat(other)
+		return node.Append(other)
 	}
 
 	left, right := node.Split(at)
-	return rebalance(left.Concat(other).Concat(right))
+	return rebalance(left.Append(other).Append(right))
 }
 
 func (node *Rope) InsertString(at int, s string) *Rope {
 	return node.Insert(NewString(s), at)
 }
 
-func (node *Rope) Concat(other *Rope) *Rope {
+func (node *Rope) Append(other *Rope) *Rope {
 	switch {
 	case node.Length() == 0:
 		return other
@@ -133,14 +133,14 @@ func (node *Rope) Concat(other *Rope) *Rope {
 	}
 }
 
-func (node *Rope) ConcatString(s string) *Rope {
-	return node.Concat(NewString(s))
+func (node *Rope) AppendString(s string) *Rope {
+	return node.Append(NewString(s))
 }
 
 func (node *Rope) Delete(at, length int) *Rope {
 	left, right := node.Split(at)
 	_, newRight := right.Split(length)
-	return rebalance(left.Concat(newRight))
+	return rebalance(left.Append(newRight))
 }
 
 func (node *Rope) Equal(other *Rope) bool {
@@ -192,12 +192,12 @@ func (node *Rope) Split(at int) (*Rope, *Rope) {
 
 	if at < node.left.Length() {
 		left, right := node.left.Split(at)
-		return left, right.Concat(node.right)
+		return left, right.Append(node.right)
 	}
 
 	if at > node.left.Length() {
 		left, right := node.right.Split(at - node.left.Length())
-		return node.left.Concat(left), right
+		return node.left.Append(left), right
 	}
 
 	return node.left, node.right
