@@ -44,6 +44,10 @@ func NewString(s string) Rope {
 	return leaf(s)
 }
 
+func NewReader(r Rope) *Reader {
+	return &Reader{rope: r}
+}
+
 type Rope interface {
 	// Append another rope to this rope, returning the new, concatenated rope.
 	Append(Rope) Rope
@@ -328,7 +332,9 @@ func (node concat) Split(at int) (Rope, Rope) {
 }
 
 func (node concat) String() string {
-	return node.left.String() + node.right.String()
+	s := stringifier{}
+	node.walk(&s)
+	return s.builder.String()
 }
 
 func (node concat) isBalanced() bool {
@@ -370,10 +376,14 @@ func (node concat) walk(w walker) {
 	node.right.walk(w)
 }
 
-// READERS AND WRITERS
+// READERS
 type Reader struct {
 	rope   Rope
-	offset int
+	offset int64
 }
 
-// FIXME
+func (reader *Reader) Read(p []byte) (n int, err error) {
+	n, err = reader.rope.ReadAt(p, reader.offset)
+	reader.offset += int64(n)
+	return
+}
