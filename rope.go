@@ -1,6 +1,7 @@
 package rope
 
 import (
+	"io"
 	"strings"
 )
 
@@ -68,8 +69,8 @@ type Rope interface {
 	// Return the length of the rope, in bytes.
 	Length() int
 
-	// Report (as a string) the contents of the rope starting at start.
-	Report(start int, length int) string
+	// Read contents at offset.
+	ReadAt(p []byte, off int64) (n int, err error)
 
 	// Split the rope at index i, returning the left and right sides.
 	Split(i int) (Rope, Rope)
@@ -82,6 +83,37 @@ type Rope interface {
 	rebalance() Rope
 	treeDepth() int
 	walk(w walker)
+}
+
+// WALKERS
+type walker interface {
+	visit(Rope)
+}
+
+// LEAF COLLECTION
+// A walker that collects leaves.
+// Note that we could just do this recursively, but by doing it this way
+// we can avoid some pressure on the garbage collector compared to the
+// naive approach, and also lets us use the existing walking infrastructure.
+type leafCollector struct {
+	leaves []leaf
+}
+
+func (walker *leafCollector) visit(node Rope) {
+	if leaf, ok := node.(leaf); ok {
+		walker.leaves = append(walker.leaves, leaf)
+	}
+}
+
+// STRINGIFICATION
+type stringifier struct {
+	builder strings.Builder
+}
+
+func (walker *stringifier) visit(node Rope) {
+	if leaf, ok := node.(leaf); ok {
+		walker.builder.WriteString(leaf.String())
+	}
 }
 
 // GENERIC IMPLEMENTATIONS
@@ -141,7 +173,7 @@ func join(node, other Rope) Rope {
 		}
 		return concat{
 			length: node.Length() + other.Length(),
-			depth:  depth,
+			depth:  depth + 1,
 			left:   node,
 			right:  other,
 		}.rebalance()
@@ -183,8 +215,16 @@ func (node leaf) Length() int {
 	return len(node)
 }
 
-func (node leaf) Report(at, length int) string {
-	return string(node[at : at+length])
+func (node leaf) ReadAt(p []byte, off int64) (n int, err error) {
+	length := int64(len(p))
+	nodeLength := int64(len(node))
+
+	if off+length >= nodeLength {
+		err = io.EOF
+	}
+
+	n = copy(p, []byte(node[off:]))
+	return
 }
 
 func (node leaf) Split(at int) (Rope, Rope) {
@@ -254,24 +294,23 @@ func (node concat) Length() int {
 	return node.length
 }
 
-func (node concat) Report(at, length int) string {
-	var b strings.Builder
-	if at < node.left.Length() {
-		leftLength := length
-		if leftLength > node.left.Length() {
-			leftLength = node.left.Length()
-		}
-		b.WriteString(node.left.Report(at, leftLength))
+func (node concat) ReadAt(p []byte, off int64) (n int, err error) {
+	length := int64(len(p))
+	nodeLength := int64(node.Length())
 
-		at = at - leftLength
-		length = length - leftLength
+	if off+length >= nodeLength {
+		err = io.EOF
 	}
 
-	if length > 0 {
-		b.WriteString(node.right.Report(at, length))
+	if off < int64(node.left.Length()) {
+		n, _ = node.left.ReadAt(p, off)
 	}
 
-	return b.String()
+	if n < len(p) {
+		n2, _ := node.right.ReadAt(p[n:], 0)
+		n += n2
+	}
+	return
 }
 
 func (node concat) Split(at int) (Rope, Rope) {
@@ -289,7 +328,7 @@ func (node concat) Split(at int) (Rope, Rope) {
 }
 
 func (node concat) String() string {
-	return node.Report(0, node.Length())
+	return node.left.String() + node.right.String()
 }
 
 func (node concat) isBalanced() bool {
@@ -297,7 +336,6 @@ func (node concat) isBalanced() bool {
 }
 
 func (node concat) rebalance() Rope {
-	// already balanced
 	if node.isBalanced() {
 		return node
 	}
@@ -332,22 +370,10 @@ func (node concat) walk(w walker) {
 	node.right.walk(w)
 }
 
-// WALKERS
-type walker interface {
-	visit(Rope)
+// READERS AND WRITERS
+type Reader struct {
+	rope   Rope
+	offset int
 }
 
-// LEAF COLLECTION
-// A walker that collects leaves.
-// Note that we could just do this recursively, but by doing it this way
-// we can avoid some pressure on the garbage collector compared to the
-// naive approach, and also lets us use the existing walking infrastructure.
-type leafCollector struct {
-	leaves []leaf
-}
-
-func (walker *leafCollector) visit(node Rope) {
-	if leaf, ok := node.(leaf); ok {
-		walker.leaves = append(walker.leaves, leaf)
-	}
-}
+// FIXME
