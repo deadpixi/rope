@@ -9,6 +9,10 @@ type Reader struct {
 	position int64
 }
 
+func NewReader(rope *Rope) *Reader {
+	return rope.Reader()
+}
+
 func (reader *Reader) Read(p []byte) (n int, err error) {
 	n, err = reader.rope.ReadAt(p, reader.position)
 	if err == nil {
