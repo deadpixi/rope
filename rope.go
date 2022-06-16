@@ -51,12 +51,12 @@ func (rope Rope) Append(other Rope) Rope {
 		if other.depth > depth {
 			depth = other.depth
 		}
-		return (&Rope{
+		return Rope{
 			length: rope.length + other.length,
 			depth:  depth + 1,
 			left:   &rope,
 			right:  &other,
-		}).rebalanceIfNeeded()
+		}.rebalanceIfNeeded()
 	}
 }
 
