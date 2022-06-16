@@ -1,3 +1,5 @@
+// The rope package provides a persistent, value-oriented Rope.
+// Ropes allow larges sequences of text to be manipulated efficienctly.
 package rope
 
 import (
@@ -53,6 +55,10 @@ func (rope Rope) Append(other Rope) Rope {
 		}).rebalanceIfNeeded()
 	}
 }
+
+// Notice that all of the methods take and return ropes by value.
+// This is slightly less efficient than if we'd done pointers, but it
+// seems cleaner from a "persistent data structure" point of view.
 
 // Return a new rope that is the concatenation of this rope and string s.
 func (rope Rope) AppendString(other string) Rope {
