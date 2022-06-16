@@ -97,15 +97,14 @@ func (rope Rope) Equal(other Rope) bool {
 
 // Return the byte at the given index.
 func (rope Rope) Index(at int) byte {
-	if rope.isLeaf() {
+	switch {
+	case rope.isLeaf():
 		return rope.content[at]
-	}
-
-	if at < rope.left.length {
+	case at < rope.left.length:
 		return rope.left.Index(at)
+	default:
+		return rope.right.Index(at - rope.left.length)
 	}
-
-	return rope.right.Index(at - rope.left.length)
 }
 
 // Return a new rope with the contents of other inserted at the given index.
