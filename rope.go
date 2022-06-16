@@ -109,16 +109,15 @@ func (rope Rope) Index(at int) byte {
 
 // Return a new rope with the contents of other inserted at the given index.
 func (rope Rope) Insert(at int, other Rope) Rope {
-	if at == 0 {
+	switch at {
+	case 0:
 		return other.Append(rope)
-	}
-
-	if at == rope.length {
+	case rope.length:
 		return rope.Append(other)
+	default:
+		left, right := rope.Split(at)
+		return left.Append(other).Append(right)
 	}
-
-	left, right := rope.Split(at)
-	return left.Append(other).Append(right)
 }
 
 // Return a new rope with the contents of string other inserted at the given index.
@@ -206,15 +205,14 @@ func (rope Rope) isLeaf() bool {
 }
 
 func (rope Rope) leafForOffset(at int) (Rope, int) {
-	if rope.isLeaf() {
+	switch {
+	case rope.isLeaf():
 		return rope, at
-	}
-
-	if at < rope.left.length {
+	case at < rope.left.length:
 		return rope.left.leafForOffset(at)
+	default:
+		return rope.right.leafForOffset(at - rope.left.length)
 	}
-
-	return rope.right.leafForOffset(at - rope.left.length)
 }
 
 func (rope Rope) rebalanceIfNeeded() Rope {
