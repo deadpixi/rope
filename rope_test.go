@@ -62,16 +62,19 @@ func TestEqual(t *testing.T) {
 		t.Fatalf("expected ropes to be equal")
 	}
 }
+
 func TestBalance(t *testing.T) {
 	rope := NewString("hello")
 	for i := 0; i < 32; i++ {
-		rope = concat{
+		rope = &Rope{
 			length: 5,
 			depth:  i + 1,
 			left:   rope,
 			right:  New(),
 		}
 	}
+
+	expectString("hello", rope.String(), t)
 
 	if rope.isBalanced() {
 		t.Fatalf("expected rope to be unbalanced")
@@ -89,7 +92,7 @@ func TestBalance(t *testing.T) {
 
 func TestBigString(t *testing.T) {
 	rope := New()
-	for i := 0; i < 1048576/32; i++ {
+	for i := 0; i < 1048576; i++ {
 		rope = rope.AppendString("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
 	}
 

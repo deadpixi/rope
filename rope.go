@@ -6,7 +6,7 @@ import (
 
 const (
 	maxDepth    = 64
-	maxLeafSize = 512
+	maxLeafSize = 4 // FIXME 512
 )
 
 type Rope struct {
@@ -38,7 +38,7 @@ func (rope *Rope) Append(other *Rope) *Rope {
 		}
 		return (&Rope{
 			length: rope.Length() + other.Length(),
-			depth:  depth,
+			depth:  depth + 1,
 			left:   rope,
 			right:  other,
 		}).rebalance()
