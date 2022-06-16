@@ -1,2 +1,3 @@
 # rope
-A persistent rope in Go
+
+A value-oriented, persistent rope in Go.
