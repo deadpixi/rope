@@ -6,12 +6,12 @@ import (
 
 // A Reader provides an implementation of io.Reader for ropes.
 type Reader struct {
-	rope     *Rope
+	rope     Rope
 	position int64
 }
 
 // Return a new reader attached to the given rope.
-func NewReader(rope *Rope) *Reader {
+func NewReader(rope Rope) *Reader {
 	return rope.Reader()
 }
 
@@ -27,7 +27,7 @@ func (reader *Reader) Read(p []byte) (n int, err error) {
 }
 
 // Return a new Reader attached to this rope.
-func (rope *Rope) Reader() *Reader {
+func (rope Rope) Reader() *Reader {
 	return &Reader{rope: rope}
 }
 

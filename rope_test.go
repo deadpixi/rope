@@ -62,14 +62,19 @@ func TestEqual(t *testing.T) {
 	}
 }
 
+func refer(rope Rope) *Rope {
+	return &rope
+}
+
 func TestBalance(t *testing.T) {
 	rope := NewString("hello")
 	for i := 0; i < 32; i++ {
-		rope = &Rope{
+		newRope := New()
+		rope = Rope{
 			length: 5,
 			depth:  i + 1,
-			left:   rope,
-			right:  New(),
+			left:   refer(rope), // this is such a hack
+			right:  &newRope,
 		}
 	}
 

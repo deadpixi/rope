@@ -21,20 +21,18 @@ type Rope struct {
 	left, right   *Rope
 }
 
-var empty = &Rope{}
-
 // Return a new empty rope.
-func New() *Rope {
-	return empty
+func New() Rope {
+	return Rope{}
 }
 
 // Return a new rope with the contents of string s.
-func NewString(s string) *Rope {
-	return &Rope{content: s, length: len(s)}
+func NewString(s string) Rope {
+	return Rope{content: s, length: len(s)}
 }
 
 // Return a new rope that is the concatenation of this rope and the other rope.
-func (rope *Rope) Append(other *Rope) *Rope {
+func (rope Rope) Append(other Rope) Rope {
 	switch {
 	case rope.length == 0:
 		return other
@@ -50,19 +48,19 @@ func (rope *Rope) Append(other *Rope) *Rope {
 		return (&Rope{
 			length: rope.length + other.length,
 			depth:  depth + 1,
-			left:   rope,
-			right:  other,
+			left:   &rope,
+			right:  &other,
 		}).rebalanceIfNeeded()
 	}
 }
 
 // Return a new rope that is the concatenation of this rope and string s.
-func (rope *Rope) AppendString(other string) *Rope {
+func (rope Rope) AppendString(other string) Rope {
 	return rope.Append(NewString(other))
 }
 
 // Return a new rope with length bytes at offset deleted.
-func (rope *Rope) Delete(offset, length int) *Rope {
+func (rope Rope) Delete(offset, length int) Rope {
 	if length == 0 || offset == rope.length {
 		return rope
 	}
@@ -73,7 +71,7 @@ func (rope *Rope) Delete(offset, length int) *Rope {
 }
 
 // Returns true if this rope is equal to other.
-func (rope *Rope) Equal(other *Rope) bool {
+func (rope Rope) Equal(other Rope) bool {
 	if rope == other {
 		return true
 	}
@@ -92,7 +90,7 @@ func (rope *Rope) Equal(other *Rope) bool {
 }
 
 // Return the byte at the given index.
-func (rope *Rope) Index(at int) byte {
+func (rope Rope) Index(at int) byte {
 	if rope.isLeaf() {
 		return rope.content[at]
 	}
@@ -105,7 +103,7 @@ func (rope *Rope) Index(at int) byte {
 }
 
 // Return a new rope with the contents of other inserted at the given index.
-func (rope *Rope) Insert(at int, other *Rope) *Rope {
+func (rope Rope) Insert(at int, other Rope) Rope {
 	if at == 0 {
 		return other.Append(rope)
 	}
@@ -119,25 +117,25 @@ func (rope *Rope) Insert(at int, other *Rope) *Rope {
 }
 
 // Return a new rope with the contents of string other inserted at the given index.
-func (rope *Rope) InsertString(at int, other string) *Rope {
+func (rope Rope) InsertString(at int, other string) Rope {
 	return rope.Insert(at, NewString(other))
 }
 
 // Return the length of the rope in bytes.
-func (rope *Rope) Length() int {
+func (rope Rope) Length() int {
 	return rope.length
 }
 
 // Return a new version of this rope that is balanced for better performance.
 // Generally speaking, this will be invoked automatically during the course of other operations and
 // thus only needs to be called if you know you'll be generating a lot of unbalanced ropes.
-func (rope *Rope) Rebalance() *Rope {
+func (rope Rope) Rebalance() Rope {
 	if rope.isBalanced() {
 		return rope
 	}
 
-	var leaves []*Rope
-	rope.walk(func(node *Rope) {
+	var leaves []Rope
+	rope.walk(func(node Rope) {
 		if node.isLeaf() {
 			leaves = append(leaves, node)
 		}
@@ -147,38 +145,38 @@ func (rope *Rope) Rebalance() *Rope {
 }
 
 // Returns two new ropes, one containing the content to the left of the given index and the other the content to the right.
-func (rope *Rope) Split(at int) (*Rope, *Rope) {
+func (rope Rope) Split(at int) (Rope, Rope) {
 	switch {
 	case rope.isLeaf():
 		return NewString(rope.content[0:at]), NewString(rope.content[at:])
 
 	case at == 0:
-		return empty, rope
+		return Rope{}, rope
 
 	case at == rope.length:
-		return rope, empty
+		return rope, Rope{}
 
 	case at < rope.left.length:
 		left, right := rope.left.Split(at)
-		return left, right.Append(rope.right)
+		return left, right.Append(*rope.right)
 
 	case at > rope.left.length:
 		left, right := rope.right.Split(at - rope.left.length)
 		return rope.left.Append(left), right
 
 	default:
-		return rope.left, rope.right
+		return *rope.left, *rope.right
 	}
 }
 
 // Return the contents of the rope as a string.
-func (rope *Rope) String() string {
+func (rope Rope) String() string {
 	if rope.isLeaf() {
 		return rope.content
 	}
 
 	var builder strings.Builder
-	rope.walk(func(node *Rope) {
+	rope.walk(func(node Rope) {
 		if node.isLeaf() {
 			builder.WriteString(node.content)
 		}
@@ -187,7 +185,7 @@ func (rope *Rope) String() string {
 	return builder.String()
 }
 
-func (rope *Rope) isBalanced() bool {
+func (rope Rope) isBalanced() bool {
 	switch {
 	case rope.depth >= len(fibonacci)-2:
 		return false
@@ -198,11 +196,11 @@ func (rope *Rope) isBalanced() bool {
 	}
 }
 
-func (rope *Rope) isLeaf() bool {
+func (rope Rope) isLeaf() bool {
 	return rope.left == nil
 }
 
-func (rope *Rope) leafForOffset(at int) (*Rope, int) {
+func (rope Rope) leafForOffset(at int) (Rope, int) {
 	if rope.isLeaf() {
 		return rope, at
 	}
@@ -214,7 +212,7 @@ func (rope *Rope) leafForOffset(at int) (*Rope, int) {
 	return rope.right.leafForOffset(at - rope.left.length)
 }
 
-func (rope *Rope) rebalanceIfNeeded() *Rope {
+func (rope Rope) rebalanceIfNeeded() Rope {
 	if rope.isLeaf() || rope.isBalanced() || abs(rope.left.depth-rope.right.depth) > balanceFactor {
 		return rope
 	}
@@ -222,12 +220,11 @@ func (rope *Rope) rebalanceIfNeeded() *Rope {
 	return rope.Rebalance()
 }
 
-func (rope *Rope) walk(callback func(*Rope)) {
+func (rope Rope) walk(callback func(Rope)) {
 	if rope.isLeaf() {
 		callback(rope)
 	} else {
 		rope.left.walk(callback)
-		callback(rope)
 		rope.right.walk(callback)
 	}
 }
@@ -239,7 +236,7 @@ func abs(a int) int {
 	return a
 }
 
-func merge(leaves []*Rope, start, end int) *Rope {
+func merge(leaves []Rope, start, end int) Rope {
 	length := end - start
 	switch length {
 	case 1:
