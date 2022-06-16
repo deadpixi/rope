@@ -56,7 +56,7 @@ func (rope *Rope) Delete(offset, length int) *Rope {
 
 	left, right := rope.Split(offset)
 	_, newRight := right.Split(length)
-	return left.Append(newRight).rebalance()
+	return left.Append(newRight)
 }
 
 func (rope *Rope) Equal(other *Rope) bool {
@@ -99,7 +99,7 @@ func (rope *Rope) Insert(at int, other *Rope) *Rope {
 	}
 
 	left, right := rope.Split(at)
-	return left.Append(other).Append(right).rebalance()
+	return left.Append(other).Append(right)
 }
 
 func (rope *Rope) InsertString(at int, other string) *Rope {
