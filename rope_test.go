@@ -31,8 +31,7 @@ func TestAppend(t *testing.T) {
 
 func TestInsert(t *testing.T) {
 	rope := NewString("hello")
-	rope = rope.InsertString(rope.Length(), "world")
-	rope = rope.InsertString(5, ", ")
+	rope = rope.InsertString(rope.Length(), "world").InsertString(5, ", ")
 
 	expectString("hello, world", rope.String(), t)
 

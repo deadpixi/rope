@@ -6,7 +6,7 @@ import (
 
 const (
 	maxDepth    = 64
-	maxLeafSize = 4 // FIXME 512
+	maxLeafSize = 4096
 )
 
 type Rope struct {
@@ -20,16 +20,16 @@ func New() *Rope {
 }
 
 func NewString(s string) *Rope {
-	return &Rope{content: s}
+	return &Rope{content: s, length: len(s)}
 }
 
 func (rope *Rope) Append(other *Rope) *Rope {
 	switch {
-	case rope.Length() == 0:
+	case rope.length == 0:
 		return other
-	case other.Length() == 0:
+	case other.length == 0:
 		return rope
-	case rope.Length()+other.Length() <= maxLeafSize:
+	case rope.length+other.length <= maxLeafSize:
 		return NewString(rope.String() + other.String())
 	default:
 		depth := rope.depth
@@ -37,7 +37,7 @@ func (rope *Rope) Append(other *Rope) *Rope {
 			depth = other.depth
 		}
 		return (&Rope{
-			length: rope.Length() + other.Length(),
+			length: rope.length + other.length,
 			depth:  depth + 1,
 			left:   rope,
 			right:  other,
@@ -50,7 +50,7 @@ func (rope *Rope) AppendString(other string) *Rope {
 }
 
 func (rope *Rope) Delete(offset, length int) *Rope {
-	if length == 0 || offset == rope.Length() {
+	if length == 0 || offset == rope.length {
 		return rope
 	}
 
@@ -64,11 +64,11 @@ func (rope *Rope) Equal(other *Rope) bool {
 		return true
 	}
 
-	if rope.Length() != other.Length() {
+	if rope.length != other.length {
 		return false
 	}
 
-	for i := 0; i < rope.Length(); i++ {
+	for i := 0; i < rope.length; i++ {
 		if rope.Index(i) != other.Index(i) {
 			return false
 		}
@@ -82,11 +82,11 @@ func (rope *Rope) Index(at int) byte {
 		return rope.content[at]
 	}
 
-	if at < rope.left.Length() {
+	if at < rope.left.length {
 		return rope.left.Index(at)
 	}
 
-	return rope.right.Index(at - rope.left.Length())
+	return rope.right.Index(at - rope.left.length)
 }
 
 func (rope *Rope) Insert(at int, other *Rope) *Rope {
@@ -94,7 +94,7 @@ func (rope *Rope) Insert(at int, other *Rope) *Rope {
 		return other.Append(rope)
 	}
 
-	if at == rope.Length() {
+	if at == rope.length {
 		return rope.Append(other)
 	}
 
@@ -107,10 +107,6 @@ func (rope *Rope) InsertString(at int, other string) *Rope {
 }
 
 func (rope *Rope) Length() int {
-	if rope.isLeaf() {
-		return len(rope.content)
-	}
-
 	return rope.length
 }
 
@@ -119,13 +115,13 @@ func (rope *Rope) Split(at int) (*Rope, *Rope) {
 		return NewString(rope.content[0:at]), NewString(rope.content[at:])
 	}
 
-	if at < rope.left.Length() {
+	if at < rope.left.length {
 		left, right := rope.left.Split(at)
 		return left, right.Append(rope.right)
 	}
 
-	if at > rope.left.Length() {
-		left, right := rope.right.Split(at - rope.left.Length())
+	if at > rope.left.length {
+		left, right := rope.right.Split(at - rope.left.length)
 		return rope.left.Append(left), right
 	}
 
@@ -140,7 +136,7 @@ func (rope *Rope) String() string {
 	var builder strings.Builder
 	rope.walk(func(node *Rope) {
 		if node.isLeaf() {
-			builder.WriteString(node.String())
+			builder.WriteString(node.content)
 		}
 	})
 
@@ -151,9 +147,9 @@ func (rope *Rope) walk(callback func(*Rope)) {
 	if rope.isLeaf() {
 		callback(rope)
 	} else {
-		callback(rope.left)
+		rope.left.walk(callback)
 		callback(rope)
-		callback(rope.right)
+		rope.right.walk(callback)
 	}
 }
 
@@ -162,7 +158,7 @@ func (rope *Rope) isBalanced() bool {
 		return false
 	}
 
-	return rope.isLeaf() || fibonacci[rope.depth+2] <= rope.Length()
+	return rope.isLeaf() || fibonacci[rope.depth+2] <= rope.length
 }
 
 func (rope *Rope) isLeaf() bool {
@@ -174,11 +170,11 @@ func (rope *Rope) leafForOffset(at int) (*Rope, int) {
 		return rope, at
 	}
 
-	if at < rope.left.Length() {
+	if at < rope.left.length {
 		return rope.left.leafForOffset(at)
 	}
 
-	return rope.right.leafForOffset(at - rope.left.Length())
+	return rope.right.leafForOffset(at - rope.left.length)
 }
 
 func (rope *Rope) rebalance() *Rope {
