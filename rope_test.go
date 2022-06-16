@@ -79,7 +79,7 @@ func TestBalance(t *testing.T) {
 		t.Fatalf("expected rope to be unbalanced")
 	}
 
-	rope = rope.rebalance()
+	rope = rope.Rebalance()
 
 	if !rope.isBalanced() {
 		t.Fatalf("expected rope to be balanced")
@@ -95,6 +95,7 @@ func TestBigString(t *testing.T) {
 		rope = rope.AppendString("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
 	}
 
+	rope = rope.Rebalance()
 	if !rope.isBalanced() {
 		t.Fatalf("expected rope to be balanced")
 	}

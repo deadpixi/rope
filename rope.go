@@ -5,8 +5,9 @@ import (
 )
 
 const (
-	maxDepth    = 64
-	maxLeafSize = 4096
+	maxDepth      = 64
+	maxLeafSize   = 4096
+	balanceFactor = 8
 )
 
 type Rope struct {
@@ -41,7 +42,7 @@ func (rope *Rope) Append(other *Rope) *Rope {
 			depth:  depth + 1,
 			left:   rope,
 			right:  other,
-		}).rebalance()
+		}).rebalanceIfNeeded()
 	}
 }
 
@@ -110,6 +111,21 @@ func (rope *Rope) Length() int {
 	return rope.length
 }
 
+func (rope *Rope) Rebalance() *Rope {
+	if rope.isBalanced() {
+		return rope
+	}
+
+	var leaves []*Rope
+	rope.walk(func(node *Rope) {
+		if node.isLeaf() {
+			leaves = append(leaves, node)
+		}
+	})
+
+	return merge(leaves, 0, len(leaves))
+}
+
 func (rope *Rope) Split(at int) (*Rope, *Rope) {
 	if rope.isLeaf() {
 		return NewString(rope.content[0:at]), NewString(rope.content[at:])
@@ -143,16 +159,6 @@ func (rope *Rope) String() string {
 	return builder.String()
 }
 
-func (rope *Rope) walk(callback func(*Rope)) {
-	if rope.isLeaf() {
-		callback(rope)
-	} else {
-		rope.left.walk(callback)
-		callback(rope)
-		rope.right.walk(callback)
-	}
-}
-
 func (rope *Rope) isBalanced() bool {
 	switch {
 	case rope.depth >= len(fibonacci)-2:
@@ -180,19 +186,29 @@ func (rope *Rope) leafForOffset(at int) (*Rope, int) {
 	return rope.right.leafForOffset(at - rope.left.length)
 }
 
-func (rope *Rope) rebalance() *Rope {
-	if rope.isBalanced() {
+func (rope *Rope) rebalanceIfNeeded() *Rope {
+	if rope.isLeaf() || rope.isBalanced() || abs(rope.left.depth-rope.right.depth) > balanceFactor {
 		return rope
 	}
 
-	var leaves []*Rope
-	rope.walk(func(node *Rope) {
-		if node.isLeaf() {
-			leaves = append(leaves, node)
-		}
-	})
+	return rope.Rebalance()
+}
 
-	return merge(leaves, 0, len(leaves))
+func (rope *Rope) walk(callback func(*Rope)) {
+	if rope.isLeaf() {
+		callback(rope)
+	} else {
+		rope.left.walk(callback)
+		callback(rope)
+		rope.right.walk(callback)
+	}
+}
+
+func abs(a int) int {
+	if a < 0 {
+		return -a
+	}
+	return a
 }
 
 func merge(leaves []*Rope, start, end int) *Rope {
