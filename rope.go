@@ -154,11 +154,14 @@ func (rope *Rope) walk(callback func(*Rope)) {
 }
 
 func (rope *Rope) isBalanced() bool {
-	if rope.depth >= len(fibonacci)-2 {
+	switch {
+	case rope.depth >= len(fibonacci)-2:
 		return false
+	case rope.isLeaf():
+		return true
+	default:
+		return fibonacci[rope.depth+2] <= rope.length
 	}
-
-	return rope.isLeaf() || fibonacci[rope.depth+2] <= rope.length
 }
 
 func (rope *Rope) isLeaf() bool {
