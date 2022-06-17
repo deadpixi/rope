@@ -1,4 +1,4 @@
-// The rope package provides a persistent, value-oriented Rope.
+// The rope package provides an immutable, value-oriented Rope.
 // Ropes allow large sequences of text to be manipulated efficiently.
 package rope
 
