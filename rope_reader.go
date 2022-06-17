@@ -36,8 +36,9 @@ func (rope Rope) Reader() *Reader {
 // the number of bytes actually read. If n < len(p), err will
 // explain the shortfall.
 func (rope *Rope) ReadAt(p []byte, off int64) (n int, err error) {
-	for n < len(p) && n < rope.Length() {
-		leaf, at := rope.leafForOffset(int(off))
+	o := int(off)
+	for n < len(p) && o+n < rope.Length() {
+		leaf, at := rope.leafForOffset(o + n)
 		n += copy(p[n:], leaf.content[at:])
 	}
 

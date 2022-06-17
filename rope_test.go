@@ -46,6 +46,23 @@ func TestSplit(t *testing.T) {
 	expectString(" now", right.String(), t)
 }
 
+func TestSlice(t *testing.T) {
+	rope := NewString("hello")
+	expectString("ell", string(rope.Slice(1, 4)), t)
+
+	rope1 := NewString("hel")
+	rope2 := NewString("lo")
+	rope3 := Rope{
+		depth:  1,
+		length: rope1.length + rope2.length,
+		left:   &rope1,
+		right:  &rope2,
+	}
+
+	expectString("hello", rope3.String(), t)
+	expectString("ell", string(rope3.Slice(1, 4)), t)
+}
+
 func TestDelete(t *testing.T) {
 	rope := NewString("how now brown cow")
 	rope = rope.Delete(8, 6)

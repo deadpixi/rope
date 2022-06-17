@@ -3,6 +3,7 @@
 package rope
 
 import (
+	"bytes"
 	"strings"
 )
 
@@ -86,25 +87,24 @@ func (rope Rope) Equal(other Rope) bool {
 		return false
 	}
 
-	for i := 0; i < rope.length; i++ {
-		if rope.Index(i) != other.Index(i) {
+	reader1 := rope.Reader()
+	reader2 := other.Reader()
+
+	var (
+		buf1, buf2 [1024]byte
+		err1, err2 error
+		n1, n2     int
+	)
+
+	for err1 == nil && err2 == nil {
+		n1, err1 = reader1.Read(buf1[:])
+		n2, err2 = reader2.Read(buf2[:])
+		if !bytes.Equal(buf1[:n1], buf2[:n2]) {
 			return false
 		}
 	}
 
 	return true
-}
-
-// Return the byte at the given index.
-func (rope Rope) Index(at int) byte {
-	switch {
-	case rope.isLeaf():
-		return rope.content[at]
-	case at < rope.left.length:
-		return rope.left.Index(at)
-	default:
-		return rope.right.Index(at - rope.left.length)
-	}
 }
 
 // Return a new rope with the contents of other inserted at the given index.
@@ -146,6 +146,13 @@ func (rope Rope) Rebalance() Rope {
 	})
 
 	return merge(leaves, 0, len(leaves))
+}
+
+// Return the bytes in [a, b)
+func (rope Rope) Slice(a, b int) []byte {
+	p := make([]byte, b-a)
+	rope.ReadAt(p, int64(a))
+	return p
 }
 
 // Returns two new ropes, one containing the content to the left of the given index and the other the content to the right.
