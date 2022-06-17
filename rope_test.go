@@ -2,6 +2,7 @@ package rope
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"strings"
 	"testing"
@@ -196,7 +197,7 @@ Signifying nothing.`
 		t.Fatalf("expected EOF error")
 	}
 
-	expectString("Creeps in this petty pace from day to day", string(buf)[:41], t)
+	expectString("Creeps in this petty pace from day to day,To the last syllable of recorded time;", string(buf)[:80], t)
 
 	buf = make([]byte, 41)
 	_, err = rope.ReadAt(buf, 120)
@@ -205,4 +206,22 @@ Signifying nothing.`
 	}
 
 	expectString("Creeps in this petty pace from day to day", string(buf), t)
+}
+
+func TestReadAtCrossingLeaves(t *testing.T) {
+	var builder strings.Builder
+
+	rope := New()
+	for i := 0; i < 65535; i++ {
+		rope = rope.AppendString(fmt.Sprintf("%v:", i))
+		builder.WriteString(fmt.Sprintf("%v:", i))
+	}
+
+	canon := builder.String()
+
+	buf := make([]byte, 20)
+	rope.ReadAt(buf, 4090)
+
+	expectString("1040:1041:1042:1043:", string(buf), t)
+	expectString("1040:1041:1042:1043:", canon[4090:4090+20], t)
 }
