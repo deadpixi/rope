@@ -151,7 +151,7 @@ func TestBalance(t *testing.T) {
 
 func TestBigString(t *testing.T) {
 	rope := New()
-	for i := 0; i < 1048576; i++ {
+	for i := 0; i < 65536; i++ {
 		rope = rope.AppendString("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
 	}
 
@@ -161,9 +161,10 @@ func TestBigString(t *testing.T) {
 	}
 
 	for i := 1; i < 11; i++ {
-		rope = rope.InsertString(1048576/i, "foo")
+		rope = rope.InsertString(65536/i, "foo")
 	}
 
+	rope = rope.Rebalance()
 	if !rope.isBalanced() {
 		t.Fatalf("expected rope to be balanced")
 	}
