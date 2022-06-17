@@ -87,8 +87,8 @@ func (rope Rope) Equal(other Rope) bool {
 		return false
 	}
 
-	for i := 0; i < rope.length; i += 4096 {
-		if !bytes.Equal(rope.Slice(i, i+4096), other.Slice(i, i+4096)) {
+	for i := 0; i < rope.length; i += maxLeafSize {
+		if !bytes.Equal(rope.Slice(i, i+maxLeafSize), other.Slice(i, i+maxLeafSize)) {
 			return false
 		}
 	}
