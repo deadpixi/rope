@@ -10,7 +10,7 @@ import (
 const (
 	maxDepth      = 64
 	maxLeafSize   = 4096
-	balanceFactor = 8
+	balanceFactor = 512
 )
 
 // A Rope is a data structure for storing long runs of text.
@@ -208,7 +208,7 @@ func (rope Rope) leafForOffset(at int) (Rope, int) {
 }
 
 func (rope Rope) rebalanceIfNeeded() Rope {
-	if rope.isLeaf() || rope.isBalanced() || abs(rope.left.depth-rope.right.depth) > balanceFactor {
+	if rope.isLeaf() || rope.isBalanced() || abs(rope.left.depth-rope.right.depth) < balanceFactor {
 		return rope
 	}
 
