@@ -140,8 +140,8 @@ func (rope Rope) Rebalance() Rope {
 // Return the bytes in [a, b)
 func (rope Rope) Slice(a, b int) []byte {
 	p := make([]byte, b-a)
-	rope.ReadAt(p, int64(a))
-	return p
+	n, _ := rope.ReadAt(p, int64(a))
+	return p[:n]
 }
 
 // Returns two new ropes, one containing the content to the left of the given index and the other the content to the right.

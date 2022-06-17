@@ -61,6 +61,8 @@ func TestSlice(t *testing.T) {
 
 	expectString("hello", rope3.String(), t)
 	expectString("ell", string(rope3.Slice(1, 4)), t)
+	expectString("ello", string(rope3.Slice(1, 40)), t)
+
 }
 
 func TestDelete(t *testing.T) {
