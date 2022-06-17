@@ -1,8 +1,38 @@
-# rope
+# Ropes in Go
 
-A value-oriented, persistent rope in Go.
+A value-oriented, immutable, functional rope in Go.
 
-# LICENSE
+# Introduction
+
+This module provides an implementation of the [rope data structure](https://en.wikipedia.org/wiki/Rope_(data_structure)) in Go.
+Ropes allow for the efficient manipulation of long strings of text.
+
+The rope structure implemented by this module is immutable, value-oriented, and
+[fully persistent](https://en.wikipedia.org/wiki/Persistent_data_structure).
+
+There is no way to modify an existing rope:
+all operations on a rope return a new rope.
+
+One notable use case that this makes particularly nice is undo/redo:
+simply keep the old versions of the rope around.
+
+# Example
+
+A simple example:
+
+```go
+
+	rope := NewString("hello")
+	rope = rope.AppendString(", world!")
+	fmt.Printf("The value of the rope is: %v\n", rope.String())
+
+```
+
+# Documentation
+
+Documentation is included inline and is also available at https://pkg.go.dev/github.com/deadpixi/rope
+
+# License
 
 rope - a persistent rope data structure
 Copyright (C) 2022 Rob King
