@@ -62,7 +62,6 @@ func TestSlice(t *testing.T) {
 	expectString("hello", rope3.String(), t)
 	expectString("ell", string(rope3.Slice(1, 4)), t)
 	expectString("ello", string(rope3.Slice(1, 40)), t)
-
 }
 
 func TestDelete(t *testing.T) {
@@ -104,6 +103,18 @@ func TestEqual(t *testing.T) {
 
 	expectString("hello", rope6.String(), t)
 	expectString("hello", rope3.String(), t)
+
+	ropeX := NewString(strings.Repeat("A", 4097)).AppendString(strings.Repeat("A", 1137))
+	ropeY := NewString(strings.Repeat("A", 1137)).AppendString(strings.Repeat("A", 4097))
+	if !ropeX.Equal(ropeY) {
+		t.Fatalf("expected ropes to be equal")
+	}
+
+	ropeX = ropeX.AppendString("X")
+	ropeY = ropeY.AppendString("Y")
+	if ropeX.Equal(ropeY) {
+		t.Fatalf("expected ropes not to be equal")
+	}
 }
 
 func refer(rope Rope) *Rope {
