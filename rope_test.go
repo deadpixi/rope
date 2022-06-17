@@ -77,6 +77,31 @@ func TestEqual(t *testing.T) {
 	if !rope.Equal(NewString("how now cow")) {
 		t.Fatalf("expected ropes to be equal")
 	}
+
+	rope1 := NewString("hel")
+	rope2 := NewString("lo")
+	rope3 := Rope{
+		depth:  1,
+		length: rope1.length + rope2.length,
+		left:   &rope1,
+		right:  &rope2,
+	}
+
+	rope4 := NewString("hel")
+	rope5 := NewString("lo")
+	rope6 := Rope{
+		depth:  1,
+		length: rope1.length + rope2.length,
+		left:   &rope4,
+		right:  &rope5,
+	}
+
+	if !rope6.Equal(rope3) {
+		t.Fatalf("expected ropes to be equal")
+	}
+
+	expectString("hello", rope6.String(), t)
+	expectString("hello", rope3.String(), t)
 }
 
 func refer(rope Rope) *Rope {
