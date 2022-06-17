@@ -87,19 +87,8 @@ func (rope Rope) Equal(other Rope) bool {
 		return false
 	}
 
-	reader1 := rope.Reader()
-	reader2 := other.Reader()
-
-	var (
-		buf1, buf2 [1024]byte
-		err1, err2 error
-		n1, n2     int
-	)
-
-	for err1 == nil && err2 == nil {
-		n1, err1 = reader1.Read(buf1[:])
-		n2, err2 = reader2.Read(buf2[:])
-		if !bytes.Equal(buf1[:n1], buf2[:n2]) {
+	for i := 0; i < rope.length; i += 4096 {
+		if !bytes.Equal(rope.Slice(i, i+4096), other.Slice(i, i+4096)) {
 			return false
 		}
 	}
