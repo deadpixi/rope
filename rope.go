@@ -129,9 +129,7 @@ func (rope Rope) Rebalance() Rope {
 
 	var leaves []Rope
 	rope.walk(func(node Rope) {
-		if node.isLeaf() {
-			leaves = append(leaves, node)
-		}
+		leaves = append(leaves, node)
 	})
 
 	return merge(leaves, 0, len(leaves))
@@ -177,9 +175,7 @@ func (rope Rope) String() string {
 
 	var builder strings.Builder
 	rope.walk(func(node Rope) {
-		if node.isLeaf() {
-			builder.WriteString(node.content)
-		}
+		builder.WriteString(node.content)
 	})
 
 	return builder.String()
@@ -224,7 +220,6 @@ func (rope Rope) walk(callback func(Rope)) {
 		callback(rope)
 	} else {
 		rope.left.walk(callback)
-		callback(rope)
 		rope.right.walk(callback)
 	}
 }
