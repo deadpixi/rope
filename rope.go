@@ -1,5 +1,5 @@
 // The rope package provides a persistent, value-oriented Rope.
-// Ropes allow larges sequences of text to be manipulated efficienctly.
+// Ropes allow large sequences of text to be manipulated efficiently.
 package rope
 
 import (
