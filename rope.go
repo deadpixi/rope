@@ -38,8 +38,7 @@ func NewString(s string) Rope {
 // This is slightly less efficient than if we'd done pointers, but it
 // seems cleaner from a "persistent data structure" point of view.
 
-// Return a new rope that is the concatenation of this rope and the other rope.
-func (rope Rope) Append(other Rope) Rope {
+func (rope Rope) concat(other Rope) Rope {
 	switch {
 	case rope.length == 0:
 		return other
@@ -57,8 +56,13 @@ func (rope Rope) Append(other Rope) Rope {
 			depth:  depth + 1,
 			left:   &rope,
 			right:  &other,
-		}.rebalanceIfNeeded()
+		}
 	}
+}
+
+// Return a new rope that is the concatenation of this rope and the other rope.
+func (rope Rope) Append(other Rope) Rope {
+	return rope.concat(other).rebalanceIfNeeded()
 }
 
 // Return a new rope that is the concatenation of this rope and string s.
@@ -105,7 +109,7 @@ func (rope Rope) Insert(at int, other Rope) Rope {
 		return rope.Append(other)
 	default:
 		left, right := rope.Split(at)
-		return left.Append(other).Append(right)
+		return left.concat(other).Append(right)
 	}
 }
 
@@ -237,10 +241,10 @@ func merge(leaves []Rope, start, end int) Rope {
 	case 1:
 		return leaves[start]
 	case 2:
-		return leaves[start].Append(leaves[start+1])
+		return leaves[start].concat(leaves[start+1])
 	default:
 		mid := start + length/2
-		return merge(leaves, start, mid).Append(merge(leaves, mid, end))
+		return merge(leaves, start, mid).concat(merge(leaves, mid, end))
 	}
 }
 
