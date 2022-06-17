@@ -224,6 +224,7 @@ func (rope Rope) walk(callback func(Rope)) {
 		callback(rope)
 	} else {
 		rope.left.walk(callback)
+		callback(rope)
 		rope.right.walk(callback)
 	}
 }
