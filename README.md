@@ -7,7 +7,7 @@ A value-oriented, immutable, functional rope in Go.
 This module provides an implementation of the [rope data structure](https://en.wikipedia.org/wiki/Rope_(data_structure)) in Go.
 Ropes allow for the efficient manipulation of long strings of text.
 
-The rope structure implemented by this module is immutable, value-oriented, immutable.
+The rope structure implemented by this module is immutable, value-oriented, and immutable.
 
 There is no way to modify an existing rope:
 all operations on a rope return a new rope.
