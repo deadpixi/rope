@@ -28,7 +28,11 @@ func (reader *Reader) Read(p []byte) (n int, err error) {
 
 // Return a new Reader attached to this rope.
 func (rope Rope) Reader() *Reader {
-	return &Reader{rope: rope}
+	return rope.OffsetReader(0)
+}
+
+func (rope Rope) OffsetReader(offset int) *Reader {
+	return &Reader{rope: rope, position: int64(offset)}
 }
 
 // ReadAt implements the standard ReadAt interface:

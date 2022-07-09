@@ -225,3 +225,16 @@ func TestReadAtCrossingLeaves(t *testing.T) {
 	expectString("1040:1041:1042:1043:", string(buf), t)
 	expectString("1040:1041:1042:1043:", canon[4090:4090+20], t)
 }
+
+func TestReaderFrom(t *testing.T) {
+	var builder strings.Builder
+
+	rope := NewString("foo\nbar\nbaz\nquux\n")
+	scanner := bufio.NewScanner(rope.OffsetReader(4))
+
+	for scanner.Scan() {
+		builder.WriteString(scanner.Text() + ":")
+	}
+
+	expectString("bar:baz:quux:", builder.String(), t)
+}
